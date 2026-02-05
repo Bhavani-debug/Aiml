@@ -1,0 +1,81 @@
+from collections import deque
+
+def water_jug_bfs_3jugs(capA, capB, capC, target):
+    visited = set()
+    queue = deque()
+
+    # (state, path)
+    queue.append(((0, 0, 0), []))
+    visited.add((0, 0, 0))
+
+    while queue:
+        (a, b, c), path = queue.popleft()
+
+        # Goal check
+        if a == target or b == target or c == target:
+            return path + [(a, b, c)]
+
+        next_states = []
+
+        # Fill jugs
+        next_states += [
+            (capA, b, c),
+            (a, capB, c),
+            (a, b, capC)
+        ]
+
+        # Empty jugs
+        next_states += [
+            (0, b, c),
+            (a, 0, c),
+            (a, b, 0)
+        ]
+
+        # Pour operations
+        # A -> B
+        t = min(a, capB - b)
+        next_states.append((a - t, b + t, c))
+
+        # A -> C
+        t = min(a, capC - c)
+        next_states.append((a - t, b, c + t))
+
+        # B -> A
+        t = min(b, capA - a)
+        next_states.append((a + t, b - t, c))
+
+        # B -> C
+        t = min(b, capC - c)
+        next_states.append((a, b - t, c + t))
+
+        # C -> A
+        t = min(c, capA - a)
+        next_states.append((a + t, b, c - t))
+
+        # C -> B
+        t = min(c, capB - b)
+        next_states.append((a, b + t, c - t))
+
+        # Process new states
+        for state in next_states:
+            if state not in visited:
+                visited.add(state)
+                queue.append((state, path + [(a, b, c)]))
+
+    return None
+result = water_jug_bfs_3jugs(8, 5, 3, 4)
+
+if result:
+    for step in result:
+        print(step)
+else:
+    print("No solution")
+
+output:
+(0, 0, 0)
+(0, 5, 0)
+(0, 2, 3)
+(0, 2, 0)
+(0, 0, 2)
+(0, 5, 2)
+(0, 4, 3)
