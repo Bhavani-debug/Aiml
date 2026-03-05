@@ -1,0 +1,60 @@
+# Backtracking CSP Solver Example (Map Coloring)
+
+# Variables
+variables = ['A', 'B', 'C', 'D']
+
+# Domains (possible values)
+domains = {
+    'A': ['Red', 'Green', 'Blue'],
+    'B': ['Red', 'Green', 'Blue'],
+    'C': ['Red', 'Green', 'Blue'],
+    'D': ['Red', 'Green', 'Blue']
+}
+
+# Constraints (neighbors cannot have same color)
+neighbors = {
+    'A': ['B', 'C'],
+    'B': ['A', 'C', 'D'],
+    'C': ['A', 'B', 'D'],
+    'D': ['B', 'C']
+}
+
+
+def is_consistent(variable, value, assignment):
+    for neighbor in neighbors[variable]:
+        if neighbor in assignment and assignment[neighbor] == value:
+            return False
+    return True
+
+
+def backtrack(assignment):
+    
+    # If assignment complete
+    if len(assignment) == len(variables):
+        return assignment
+
+    # Select unassigned variable
+    unassigned = [v for v in variables if v not in assignment]
+    var = unassigned[0]
+
+    # Try domain values
+    for value in domains[var]:
+        if is_consistent(var, value, assignment):
+            
+            assignment[var] = value
+            
+            result = backtrack(assignment)
+            if result:
+                return result
+            
+            # Backtrack
+            del assignment[var]
+
+    return None
+
+
+solution = backtrack({})
+print("Solution:", solution)
+
+output:
+Solution: {'A': 'Red', 'B': 'Green', 'C': 'Blue', 'D': 'Red'}
