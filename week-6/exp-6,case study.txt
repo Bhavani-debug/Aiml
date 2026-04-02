@@ -1,0 +1,68 @@
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
+
+# Step 1: Define structure (DAG)
+model = DiscreteBayesianNetwork([
+    ('Income', 'Default'),
+    ('Credit', 'Default')
+])
+
+# Step 2: Define CPDs
+
+# P(Income)
+cpd_income = TabularCPD(
+    variable='Income',
+    variable_card=2,
+    values=[[0.6], [0.4]]
+)
+
+# P(Credit)
+cpd_credit = TabularCPD(
+    variable='Credit',
+    variable_card=2,
+    values=[[0.7], [0.3]]
+)
+
+# P(Default | Income, Credit)
+cpd_default = TabularCPD(
+    variable='Default',
+    variable_card=2,
+    values=[
+        [0.95, 0.8, 0.9, 0.5],   # Default = 0 (No Default)
+        [0.05, 0.2, 0.1, 0.5]    # Default = 1 (Default)
+    ],
+    evidence=['Income', 'Credit'],
+    evidence_card=[2, 2]
+)
+
+# Step 3: Add CPDs to model
+model.add_cpds(cpd_income, cpd_credit, cpd_default)
+
+# Step 4: Validate model
+print("Model Valid:", model.check_model())
+
+# Step 5: Inference
+infer = VariableElimination(model)
+
+# Query: P(Default | Income=1, Credit=0)
+query_result = infer.query(
+    variables=['Default'],
+    evidence={'Income': 1, 'Credit': 0}
+)
+
+# Step 6: Output
+print("\nInference Result:")
+print(query_result)
+
+output:
+Model Valid: True
+
+Inference Result:
++------------+----------------+
+| Default    |   phi(Default) |
++============+================+
+| Default(0) |         0.9000 |
++------------+----------------+
+| Default(1) |         0.1000 |
++------------+----------------+
